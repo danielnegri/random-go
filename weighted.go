@@ -1,10 +1,15 @@
 package random
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
+
+var random = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func Seed(s int64) {
+	random = rand.New(rand.NewSource(s))
+}
 
 // SelectWeightedIndex returns a weighted random index given a list of probabilities.
 // For example, given [2, 3, 5] it returns 0 (the index of the first element) with
@@ -14,11 +19,7 @@ import (
 //
 // Time Complexity: O(N)
 // Space Complexity: O(N)
-func SelectWeightedIndex(weights []float64, seed int64) (int, error) {
-	if len(weights) == 0 {
-		return 0, fmt.Errorf("invalid parameters: weights cannot be empty")
-	}
-
+func SelectWeightedIndex(weights []float64) int {
 	var totals = make([]float64, len(weights))
 	var total float64
 
@@ -27,17 +28,12 @@ func SelectWeightedIndex(weights []float64, seed int64) (int, error) {
 		totals[i] = total
 	}
 
-	if seed == 0 {
-		seed = time.Now().UnixNano()
-	}
-
-	rand.Seed(seed)
-	rnd := rand.Float64() * total
+	rnd := random.Float64() * total
 	for i, v := range totals {
 		if rnd < v {
-			return i, nil
+			return i
 		}
 	}
 
-	return 0, nil
+	return 0
 }
